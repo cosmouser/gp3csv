@@ -4,6 +4,7 @@ import (
 	"io"
 	"encoding/binary"
 	"errors"
+	log "github.com/sirupsen/logrus"
 )
 
 type header struct {
@@ -12,6 +13,11 @@ type header struct {
 	DirectorySize uint32 // The size of the directory
 	HeaderKey uint32 // Decryption key
 	Start uint32 // File offset of directory
+}
+
+type treeInfo struct {
+	NumEntries uint32
+	EntryOffset uint32
 }
 
 func loadHeader(r io.Reader) (h header, err error) {
@@ -24,6 +30,27 @@ func loadHeader(r io.Reader) (h header, err error) {
 	}
 	return
 }
+
+func traverseTree(rs io.ReadSeeker, parent string, offset int64) {
+	if _, err := rs.Seek(offset, 0); err != nil {
+		log.WithFields(log.Fields{
+			"parent": parent,
+			"offset": offset,
+			"err": err,
+		}).Fatal("seek failed")
+	}
+	info := treeInfo{}
+	err := binary.Read(rs, binary.LittleEndian, &info)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"parent": parent,
+			"offset": offset,
+			"err": err,
+		}).Fatal("treeInfo read failed")
+	}
+}
+
+
 
 
 
