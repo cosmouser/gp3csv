@@ -38,7 +38,7 @@ func TestTraverseTree(t *testing.T) {
 	}
 	// add all of the filenames to a map and check the size of the map
 	result := make(map[string][]byte)
-	traverseTree(file, "/", int64(h.Start))
+	traverseTree(file, "/", int64(h.Start), result)
 	if len(result) == 0 {
 		t.Error("traverseTree failed to traverse the archive")
 	}
