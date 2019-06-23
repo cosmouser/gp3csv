@@ -27,3 +27,22 @@ func TestLoadHeader(t *testing.T) {
 	file.Close()
 }
 
+func TestTraverseTree(t *testing.T) {
+	file, err := os.Open(path.Join("..", "TAESC.gp3"))
+	if err != nil {
+		t.Error(err)
+	}
+	h, err := loadHeader(file)
+	if err != nil {
+		t.Error(err)
+	}
+	// add all of the filenames to a map and check the size of the map
+	result := make(map[string][]byte)
+	traverseTree(file, "/", int64(h.Start))
+	if len(result) == 0 {
+		t.Error("traverseTree failed to traverse the archive")
+	}
+	file.Close()
+}
+
+
