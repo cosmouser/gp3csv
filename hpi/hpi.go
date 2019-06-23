@@ -3,6 +3,7 @@ package hpi
 import (
 	"io"
 	"encoding/binary"
+	"errors"
 )
 
 type header struct {
@@ -17,6 +18,9 @@ func loadHeader(r io.Reader) (h header, err error) {
 	err = binary.Read(r, binary.LittleEndian, &h)
 	if err != nil {
 		return
+	}
+	if string(h.Marker[:]) != "HAPI" {
+		err = errors.New("invalid file format")
 	}
 	return
 }
