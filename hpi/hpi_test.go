@@ -11,12 +11,18 @@ func TestLoadHeader(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	header, err := scanHeader(file)
+	header, err := loadHeader(file)
 	if err != nil {
 		t.Error(err)
 	}
-	if header.marker != "HAPI" {
-		t.Error("expected HAPI, got %v", header.marker)
+	if string(header.marker[:]) != "HAPI" {
+		t.Errorf("expected HAPI, got %v", header.marker)
+	}
+	if header.directorySize == 0 {
+		t.Error("got zero value for header.directorySize")
+	}
+	if header.start == 0 {
+		t.Error("got zero value for header.start")
 	}
 	file.Close()
 }
