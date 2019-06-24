@@ -58,9 +58,36 @@ func TestMakeRecords(t *testing.T) {
 		t.Error("some weapon records were not gathered")
 	}
 }
-
-
-
+func TestEncodeUnitsCSV(t *testing.T) {
+	db, err := openGob()
+	if err != nil {
+		t.Error(err)
+	}
+	unitsFile, err := os.Create(path.Join("..", "tmp_units.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	err = EncodeUnitsCSV(db, unitsFile)
+	if err != nil {
+		t.Error(err)
+	}
+	unitsFile.Close()
+}
+func TestEncodeWeaponsCSV(t *testing.T) {
+	db, err := openGob()
+	if err != nil {
+		t.Error(err)
+	}
+	weaponsFile, err := os.Create(path.Join("..", "tmp_weapons.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	err = EncodeWeaponsCSV(db, weaponsFile)
+	if err != nil {
+		t.Error(err)
+	}
+	weaponsFile.Close()
+}
 
 func TestUnitData(t *testing.T) {
 	db, err := openGob()

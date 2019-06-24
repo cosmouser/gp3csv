@@ -2,9 +2,11 @@ package ugd
 
 import (
 	"github.com/cosmouser/tdf"
+	"io"
 	"path"
 	"strings"
 	"bytes"
+	"encoding/csv"
 )
 
 const (
@@ -14,6 +16,42 @@ const (
 	escDownloadsDir = "downloadsE"
 )
 
+// EncodeUnitsCSV writes tdf unit data in CSV format
+func EncodeUnitsCSV(store map[string][]byte, out io.Writer) (err error) {
+	unitNodes, err := loadTdfDataDir(store, escUnitsDir)
+	if err != nil {
+		return err
+	}
+	downloadNodes, err := loadTdfDataDir(store, escDownloadsDir)
+	if err != nil {
+		return err
+	}
+	addBuildRelationships(unitNodes, downloadNodes)
+	unitRecords, err := makeUnitRecords(unitNodes)
+	if err != nil {
+		return err
+	}
+	csvWriter := csv.NewWriter(out)
+	err = csvWriter.WriteAll(unitRecords)
+	csvWriter.Flush()
+	return
+}
+
+// EncodeWeaponsCSV writes tdf weapon data in CSV format
+func EncodeWeaponsCSV(store map[string][]byte, out io.Writer) (err error) {
+	weapNodes, err := loadTdfDataDir(store, escWeaponsDir)
+	if err != nil {
+		return err
+	}
+	weapRecords, err := makeWeaponRecords(weapNodes)
+	if err != nil {
+		return err
+	}
+	csvWriter := csv.NewWriter(out)
+	err = csvWriter.WriteAll(weapRecords)
+	csvWriter.Flush()
+	return
+}
 func loadTdfDataDir(store map[string][]byte, dir string) (nodes []*tdf.Node, err error) {
 	fileNames := []string{}
 	dirPath := path.Join("/", dir)
