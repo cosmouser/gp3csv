@@ -2,6 +2,7 @@ package hpi
 
 import (
 	"testing"
+	"time"
 	"path"
 	"os"
 )
@@ -38,12 +39,14 @@ func TestTraverseTree(t *testing.T) {
 	}
 	// add all of the filenames to a map and check the size of the map
 	result := make(map[string][]byte)
+	t0 := time.Now()
 	traverseTree(file, "/", int64(h.Start), result)
+	t.Logf("traverseTree took %v", time.Since(t0))
 	if len(result) == 0 {
 		t.Error("traverseTree failed to traverse the archive")
 	}
-	if len(result["/unitsE/ARMCOM.FBI"]) == 0 {
-		t.Error("got zero value for size of /unitsE/ARMCOM.FBI")
+	if len(result["/unitse/armcom.fbi"]) == 0 {
+		t.Error("got zero value for size of /unitse/armcom.fbi")
 	}
 	file.Close()
 }
