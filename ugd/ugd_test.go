@@ -40,8 +40,8 @@ func TestMakeUnitRecords(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if len(records) < 1 {
-		t.Fatal("no records were created")
+	if len(records) < 200 {
+		t.Fatal("less than half of the units were recorded")
 	}
 	if len(records[0]) < 2 {
 		t.Error("no fields were created")

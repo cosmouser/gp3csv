@@ -85,5 +85,13 @@ func makeUnitRecords(unitinfoList []*tdf.Node) (records [][]string, err error) {
 		}
 	}
 	records = append(records, fields)
+	for _, unitNode := range unitinfoList {
+		tmp := make([]string, len(fields))
+		for k, v := range unitNode.Fields {
+			tmp[fieldsMap[k]] = v
+		}
+		records = append(records, tmp)
+	}
 	return
 }
+
