@@ -54,7 +54,9 @@ func TestMakeRecords(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
+	if len(weaponRecords) > 0 {
+		t.Error("no records were created")
+	}
 }
 
 

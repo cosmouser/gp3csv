@@ -95,3 +95,33 @@ func makeUnitRecords(unitinfoList []*tdf.Node) (records [][]string, err error) {
 	return
 }
 
+func makeWeaponRecords(weaponList []*tdf.Node) (records [][]string, err error) {
+	// Ensure weapname is the first field.
+	fields := []string{"weapname"}
+	fieldsMap := make(map[string]int)
+	fieldsMap["weapname"] = 1
+	fieldCursor := 1
+	for _, weapNode := range weaponList {
+		for k := range weapNode.Fields {
+			if fieldNumber, ok := fieldsMap[k]; !ok && fieldNumber == 0 {
+				fields = append(fields, k)
+				fieldCursor++
+				fieldsMap[k] = fieldCursor
+			}
+		}
+	}
+	for _, weapNode := range weaponList {
+		for k := range weapNode.Children[0].Fields {
+			damageKey := weapNode.Children[0].Name + "_" + k
+			if fieldNumber, ok := fieldsMap[damageKey]; !ok && fieldNumber == 0 {
+				fields = append(fields, damageKey)
+				fieldCursor++
+				fieldsMap[damageKey] = fieldCursor
+			}
+		}
+	}
+	records = append(records, fields)
+	return
+}
+
+
