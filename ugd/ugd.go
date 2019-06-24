@@ -36,3 +36,54 @@ func loadTdfDataDir(store map[string][]byte, dir string) (nodes []*tdf.Node, err
 	return
 }
 
+func addBuildRelationships(unitinfoList, buildinfoList []*tdf.Node) {
+	unitsIndex := make(map[string]int)
+	for i, v := range unitinfoList {
+		unitsIndex[v.Fields["unitname"]] = i
+	}
+	for _, v := range buildinfoList {
+		if str, ok := v.Fields["unitmenu"]; ok {
+			if unitIndex, ok := unitsIndex[str]; ok {
+				canbuildList := unitinfoList[unitIndex].Fields["canbuild"]
+				if strings.Index(canbuildList, v.Fields["unitname"]) < 0 {
+					if canbuildList != "" {
+						unitinfoList[unitIndex].Fields["canbuild"] += " " + v.Fields["unitname"]
+					} else {
+						unitinfoList[unitIndex].Fields["canbuild"] += v.Fields["unitname"]
+					}
+				}
+			}
+		}
+		if str, ok := v.Fields["unitname"]; ok {
+			if unitIndex, ok := unitsIndex[str]; ok {
+				builtbyList := unitinfoList[unitIndex].Fields["builtby"]
+				if strings.Index(builtbyList, v.Fields["unitmenu"]) < 0 {
+					if builtbyList != "" {
+						unitinfoList[unitIndex].Fields["builtby"] += " " + v.Fields["unitmenu"]
+					} else {
+						unitinfoList[unitIndex].Fields["builtby"] += v.Fields["unitmenu"]
+					}
+				}
+			}
+		}
+	}
+}
+
+func makeUnitRecords(unitinfoList []*tdf.Node) (records [][]string, err error) {
+	// Ensure unitname is the first field.
+	fields := []string{"unitname"}
+	fieldsMap := make(map[string]int)
+	fieldsMap["unitname"] = 1
+	fieldCursor := 1
+	for _, unitNode := range unitinfoList {
+		for k := range unitNode.Fields {
+			if fieldNumber, ok := fieldsMap[k]; !ok && fieldNumber == 0 {
+				fields = append(fields, k)
+				fieldCursor++
+				fieldsMap[k] = fieldCursor
+			}
+		}
+	}
+	records = append(records, fields)
+	return
+}
