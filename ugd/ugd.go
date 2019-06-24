@@ -121,6 +121,18 @@ func makeWeaponRecords(weaponList []*tdf.Node) (records [][]string, err error) {
 		}
 	}
 	records = append(records, fields)
+	for _, weapNode := range weaponList {
+		tmp := make([]string, len(fields))
+		tmp[0] = weapNode.Name
+		for k, v := range weapNode.Fields {
+			tmp[fieldsMap[k]-1] = v
+		}
+		for k, v := range weapNode.Children[0].Fields {
+			damageKey := weapNode.Children[0].Name + "_" + k
+			tmp[fieldsMap[damageKey]-1] = v
+		}
+		records = append(records, tmp)
+	}
 	return
 }
 

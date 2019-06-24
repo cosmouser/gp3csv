@@ -40,8 +40,8 @@ func TestMakeRecords(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if len(unitRecords) < 200 {
-		t.Fatal("less than half of the units were recorded")
+	if len(unitRecords) != len(nodes)+1 {
+		t.Fatal("some unit records were not gathered")
 	}
 	if len(unitRecords[0]) < 2 {
 		t.Error("no fields were created")
@@ -54,8 +54,8 @@ func TestMakeRecords(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if len(weaponRecords) > 0 {
-		t.Error("no records were created")
+	if len(weaponRecords) != len(weapNodes)+1 {
+		t.Error("some weapon records were not gathered")
 	}
 }
 
