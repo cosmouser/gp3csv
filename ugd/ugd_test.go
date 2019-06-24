@@ -22,7 +22,7 @@ func openGob() (store map[string][]byte, err error) {
 	return
 }
 
-func TestMakeUnitRecords(t *testing.T) {
+func TestMakeRecords(t *testing.T) {
 	db, err := openGob()
 	if err != nil {
 		t.Error(err)
@@ -36,16 +36,25 @@ func TestMakeUnitRecords(t *testing.T) {
 		t.Error(err)
 	}
 	addBuildRelationships(nodes, downloadNodes)
-	records, err := makeUnitRecords(nodes)
+	unitRecords, err := makeUnitRecords(nodes)
 	if err != nil {
 		t.Error(err)
 	}
-	if len(records) < 200 {
+	if len(unitRecords) < 200 {
 		t.Fatal("less than half of the units were recorded")
 	}
-	if len(records[0]) < 2 {
+	if len(unitRecords[0]) < 2 {
 		t.Error("no fields were created")
 	}
+	weapNodes, err := loadTdfDataDir(db, escWeaponsDir)
+	if err != nil {
+		t.Error(err)
+	}
+	weaponRecords, err := makeWeaponRecords(weapNodes)
+	if err != nil {
+		t.Error(err)
+	}
+
 }
 
 
