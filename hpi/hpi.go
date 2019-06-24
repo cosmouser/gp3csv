@@ -25,6 +25,12 @@ type dirInfo struct {
 	EntryOffset uint32
 }
 
+type fileData struct {
+	DataOffset uint32 // Starting offset of the file
+	FileSize uint32 // Size of the decompressed file
+	Flag byte // 1: compressed with LZ77, 2: compressed iwth zlib, 0: not compressed
+}
+
 type dirEntry struct {
 	NameOffset uint32 // Points to the filename
 	DirDataOffset uint32 // Points to the directory data
@@ -39,6 +45,11 @@ func loadHeader(r io.Reader) (h header, err error) {
 	if string(h.Marker[:]) != "HAPI" {
 		err = errors.New("invalid file format")
 	}
+	return
+}
+
+func loadFileData(r io.Reader) (fd fileData, err error) {
+	err = binary.Read(r, binary.LittleEndian, &fd)
 	return
 }
 
@@ -97,6 +108,14 @@ func traverseTree(rs io.ReadSeeker, parent string, offset int64, store map[strin
 		} else {
 			// dirEntry is for file
 			store[name] = []byte{}
+			if n, err := rs.Seek(int64(entry.DirDataOffset), io.SeekStart); err != nil {
+				log.WithFields(log.Fields{
+					"parent": parent,
+					"entry.DirDataOffset": entry.DirDataOffset,
+					"newpos": n,
+					"err": err,
+				}).Fatal("seek failed")
+			}
 		}
 	}
 }

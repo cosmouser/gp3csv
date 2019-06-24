@@ -42,6 +42,9 @@ func TestTraverseTree(t *testing.T) {
 	if len(result) == 0 {
 		t.Error("traverseTree failed to traverse the archive")
 	}
+	if len(result["/unitsE/ARMCOM.FBI"]) == 0 {
+		t.Error("got zero value for size of /unitsE/ARMCOM.FBI")
+	}
 	file.Close()
 }
 
