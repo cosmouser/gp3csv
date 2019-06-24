@@ -1,7 +1,6 @@
 package hpi
 
 import (
-	"strings"
 	"io"
 	"encoding/binary"
 	"bytes"
@@ -165,7 +164,7 @@ func traverseTree(rs io.ReadSeeker, parent string, offset int64, store map[strin
 				"err": err,
 			}).Fatal("nameReader failed")
 		}
-		name := strings.ToLower(path.Join(parent, string(fileName[:len(fileName)-1])))
+		name := path.Join(parent, string(fileName[:len(fileName)-1]))
 		if entry.Flag == 1 {
 			// dirEntry is for directory, recurse
 			traverseTree(rs, name, int64(entry.DirDataOffset), store)
