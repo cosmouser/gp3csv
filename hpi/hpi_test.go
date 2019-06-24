@@ -2,6 +2,7 @@ package hpi
 
 import (
 	"testing"
+	"encoding/gob"
 	"time"
 	"path"
 	"os"
@@ -49,6 +50,17 @@ func TestTraverseTree(t *testing.T) {
 		t.Error("got zero value for size of /unitse/armcom.fbi")
 	}
 	file.Close()
+	if os.Getenv("HPI2GOB") == "GO" {
+		out, err := os.Create(path.Join("..", "TAESC.gp3.gob"))
+		if err != nil {
+			t.Error(err)
+		}
+		enc := gob.NewEncoder(out)
+		err = enc.Encode(result)
+		if err != nil {
+			t.Error(err)
+		}
+		out.Close()
+	}
 }
-
 
