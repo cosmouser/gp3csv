@@ -2,7 +2,11 @@ package ugd
 
 import (
 	"github.com/cosmouser/tdf"
+	"github.com/cosmouser/pcx"
+	"image"
+	"image/png"
 	"io"
+	"archive/zip"
 	"path"
 	"strings"
 	"bytes"
@@ -52,6 +56,25 @@ func EncodeWeaponsCSV(store map[string][]byte, out io.Writer) (err error) {
 	csvWriter.Flush()
 	return
 }
+// ExportPicsToZip writes the unitpics to a zip file
+func ExportPicsToZip(pics map[string]image.Image, out io.Writer) (err error) {
+	zipWriter := zip.NewWriter(out)
+	var imageBuf bytes.Buffer
+	for k, v := range pics {
+		f, err := zipWriter.Create(k)
+		if err != nil {
+			return err
+		}
+		err = png.Encode(&imageBuf, v)
+		if err != nil {
+			return err
+		}
+		f.Write(imageBuf.Bytes())
+		imageBuf.Reset()
+	}
+	err = zipWriter.Close()
+	return
+}
 func loadTdfDataDir(store map[string][]byte, dir string) (nodes []*tdf.Node, err error) {
 	fileNames := []string{}
 	dirPath := path.Join("/", dir)
@@ -69,6 +92,26 @@ func loadTdfDataDir(store map[string][]byte, dir string) (nodes []*tdf.Node, err
 			for _, v := range tmp {
 				nodes = append(nodes, v)
 			}
+		}
+	}
+	return
+}
+func gatherUnitPics(store map[string][]byte) (pics map[string]image.Image, err error) {
+	pics = make(map[string]image.Image)
+	fileNames := []string{}
+	dirPath := path.Join("/", escUnitpicsDir)
+	for k := range store {
+		if strings.Index(k, dirPath) == 0 {
+			fileNames = append(fileNames, k)
+		}
+	}
+	for _, fileName := range fileNames {
+		if ext := strings.ToLower(path.Ext(fileName)); ext == ".pcx" {
+			tmp, err := pcx.Decode8Bit256Color(bytes.NewReader(store[fileName]))
+			if err != nil {
+				return pics, err
+			}
+			pics[path.Base(fileName)+".png"] = tmp
 		}
 	}
 	return

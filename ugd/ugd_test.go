@@ -63,7 +63,8 @@ func TestEncodeUnitsCSV(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	unitsFile, err := os.Create(path.Join("..", "tmp_units.csv"))
+	outFilePath := path.Join("..", "tmp_units.csv")
+	unitsFile, err := os.Create(outFilePath)
 	if err != nil {
 		t.Error(err)
 	}
@@ -72,13 +73,18 @@ func TestEncodeUnitsCSV(t *testing.T) {
 		t.Error(err)
 	}
 	unitsFile.Close()
+	err = os.Remove(outFilePath)
+	if err != nil {
+		t.Error(err)
+	}
 }
 func TestEncodeWeaponsCSV(t *testing.T) {
 	db, err := openGob()
 	if err != nil {
 		t.Error(err)
 	}
-	weaponsFile, err := os.Create(path.Join("..", "tmp_weapons.csv"))
+	outFilePath := path.Join("..", "tmp_weapons.csv")
+	weaponsFile, err := os.Create(outFilePath)
 	if err != nil {
 		t.Error(err)
 	}
@@ -87,6 +93,30 @@ func TestEncodeWeaponsCSV(t *testing.T) {
 		t.Error(err)
 	}
 	weaponsFile.Close()
+	err = os.Remove(outFilePath)
+	if err != nil {
+		t.Error(err)
+	}
+}
+func TestGatherUnitPics(t *testing.T) {
+	db, err := openGob()
+	if err != nil {
+		t.Error(err)
+	}
+	pics, err := gatherUnitPics(db)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(pics) == 0 {
+		t.Error("pics slice is empty")
+	}
+	outFilePath := path.Join("..", "tmp_pics.zip")
+	picsArchive, err := os.Create(outFilePath)
+	err = ExportPicsToZip(pics, picsArchive)
+	if err != nil {
+		t.Error(err)
+	}
+	picsArchive.Close()
 }
 
 func TestUnitData(t *testing.T) {
