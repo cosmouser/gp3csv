@@ -20,7 +20,7 @@ func main() {
 	}
 	args := flag.Args()
 	if len(args) < 1 {
-		fmt.Fprint(os.Stderr, "gp3csv TAESC.gp3")
+		fmt.Fprint(os.Stderr, "usage: gp3csv <TAESC.gp3>\n")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
