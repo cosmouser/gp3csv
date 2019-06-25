@@ -96,7 +96,8 @@ func loadTdfDataDir(store map[string][]byte, dir string) (nodes []*tdf.Node, err
 	}
 	return
 }
-func gatherUnitPics(store map[string][]byte) (pics map[string]image.Image, err error) {
+// GatherUnitPics extracts the pcx unit pics from the memory store
+func GatherUnitPics(store map[string][]byte) (pics map[string]image.Image, err error) {
 	pics = make(map[string]image.Image)
 	fileNames := []string{}
 	dirPath := path.Join("/", escUnitpicsDir)

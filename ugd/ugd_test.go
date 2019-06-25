@@ -103,7 +103,7 @@ func TestGatherUnitPics(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	pics, err := gatherUnitPics(db)
+	pics, err := GatherUnitPics(db)
 	if err != nil {
 		t.Error(err)
 	}
@@ -117,6 +117,10 @@ func TestGatherUnitPics(t *testing.T) {
 		t.Error(err)
 	}
 	picsArchive.Close()
+	err = os.Remove(outFilePath)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestUnitData(t *testing.T) {

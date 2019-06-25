@@ -50,6 +50,17 @@ type chunk struct {
 	Checksum uint32 // A sum of all the bytes of the data
 }
 
+// LoadHPI copies the content of an HPI file to memory
+func LoadHPI(rs io.ReadSeeker) (store map[string][]byte, err error) {
+	hpiHeader, err := loadHeader(rs)
+	if err != nil {
+		return store, err
+	}
+	store = make(map[string][]byte)
+	traverseTree(rs, "/", int64(hpiHeader.Start), store)
+	return
+}
+
 func decryptChunkData(ec []byte, compressedSize int) (dc []byte) {
 	dc = make([]byte, compressedSize)
 	for i := 0; i < compressedSize; i++ {
