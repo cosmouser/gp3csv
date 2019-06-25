@@ -4,6 +4,7 @@ import (
 	"github.com/cosmouser/gp3csv/hpi"
 	"github.com/cosmouser/gp3csv/ugd"
 	"os"
+	"fmt"
 	"flag"
 )
 
@@ -11,16 +12,22 @@ func main() {
 	unitsBool := flag.Bool("u", true, "extract unit data")
 	weaponsBool := flag.Bool("w", true, "extract weapon data")
 	imgBool := flag.Bool("p", true, "extract unitpics")
+	versBool := flag.Bool("v", false, "prints the version and exits")
 	flag.Parse()
+	if *versBool {
+		fmt.Println("gp3csv version 1.0.0")
+		os.Exit(0)
+	}
 	args := flag.Args()
 	if len(args) < 1 {
+		fmt.Fprint(os.Stderr, "gp3csv TAESC.gp3")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
 	for _, v := range args {
 		err := processArchive(v, *unitsBool, *weaponsBool, *imgBool)
 		if err != nil {
-			panic(err)
+			fmt.Fprint(os.Stderr, err)
 		}
 	}
 }
