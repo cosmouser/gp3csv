@@ -1,32 +1,128 @@
 package ugd
 
 import (
-	"github.com/cosmouser/tdf"
-	"github.com/cosmouser/pcx"
+	"archive/zip"
+	"bytes"
+	"encoding/csv"
+	"encoding/json"
 	"image"
 	"image/png"
 	"io"
-	"archive/zip"
 	"path"
+	"sort"
 	"strings"
-	"bytes"
-	"encoding/csv"
+
+	"github.com/cosmouser/pcx"
+	"github.com/cosmouser/tdf"
 )
 
-const (
-	escUnitsDir = "unitsE"
-	escWeaponsDir = "weaponE"
-	escUnitpicsDir = "unitpicE"
-	escDownloadsDir = "downloadsE"
+var (
+	unitsDir     = "unitsE"
+	weaponDir    = "weaponE"
+	unitpicsDir  = "unitpicE"
+	downloadsDir = "downloadsE"
 )
 
-// EncodeUnitsCSV writes tdf unit data in CSV format
-func EncodeUnitsCSV(store map[string][]byte, out io.Writer) (err error) {
-	unitNodes, err := loadTdfDataDir(store, escUnitsDir)
+// SetPaths sets custom paths
+func SetPaths(units, weapon, unitpics, downloads string) {
+	unitsDir = units
+	weaponDir = weapon
+	unitpicsDir = unitpics
+	downloadsDir = downloads
+}
+
+// Manifest has information for TADA on how to handle the mod data
+type Manifest struct {
+	ModName   string   `json:"modName"`
+	Checksum  string   `json:"checksum"`
+	Extension string   `json:"ext"`
+	Features  []string `json:"features"`
+}
+
+// CreateModCassette extracts data for TADA
+func CreateModCassette(store map[string][]byte, info Manifest, out io.Writer) (err error) {
+	unitNodes, err := loadTdfDataDir(store, unitsDir)
 	if err != nil {
 		return err
 	}
-	downloadNodes, err := loadTdfDataDir(store, escDownloadsDir)
+	// Create a zip with a manifest.json, units json and unitpic directory of images
+	// The units json is an alphabetically sorted array by unitname
+	var (
+		unitsInfo []map[string]string
+		unitsTmp  map[int]map[string]string
+	)
+	unitnames := []string{}
+	unitsIndex := make(map[string]int)
+	unitsTmp = make(map[int]map[string]string)
+	for _, v := range unitNodes {
+		unitnames = append(unitnames, v.Fields["unitname"])
+	}
+	sort.Strings(unitnames)
+	for i, v := range unitnames {
+		unitsIndex[v] = i
+	}
+
+	for _, v := range unitNodes {
+		tmp := make(map[string]string)
+		for _, f := range info.Features {
+			feature := strings.ToLower(f)
+			tmp[feature] = v.Fields[feature]
+		}
+		unitsTmp[unitsIndex[v.Fields["unitname"]]] = tmp
+	}
+	unitsInfo = make([]map[string]string, len(unitNodes))
+	for i := 0; i < len(unitsInfo); i++ {
+		unitsInfo[i] = unitsTmp[i]
+	}
+
+	zipWriter := zip.NewWriter(out)
+	f, err := zipWriter.Create(path.Join(info.Checksum, "manifest.json"))
+	if err != nil {
+		return err
+	}
+	dat, err := json.Marshal(info)
+	if err != nil {
+		return err
+	}
+	f.Write(dat)
+	f, err = zipWriter.Create(path.Join(info.Checksum, "units.json"))
+	if err != nil {
+		return err
+	}
+	dat, err = json.Marshal(unitsInfo)
+	if err != nil {
+		return err
+	}
+	f.Write(dat)
+
+	pics, err := GatherUnitPics(store)
+	if err != nil {
+		return err
+	}
+	var imageBuf bytes.Buffer
+	for k, v := range pics {
+		f, err := zipWriter.Create(path.Join(info.Checksum, "unitpic", strings.ToLower(k)))
+		if err != nil {
+			return err
+		}
+		err = png.Encode(&imageBuf, v)
+		if err != nil {
+			return err
+		}
+		f.Write(imageBuf.Bytes())
+		imageBuf.Reset()
+	}
+	err = zipWriter.Close()
+	return err
+}
+
+// EncodeUnitsCSV writes tdf unit data in CSV format
+func EncodeUnitsCSV(store map[string][]byte, out io.Writer) (err error) {
+	unitNodes, err := loadTdfDataDir(store, unitsDir)
+	if err != nil {
+		return err
+	}
+	downloadNodes, err := loadTdfDataDir(store, downloadsDir)
 	if err != nil {
 		return err
 	}
@@ -43,7 +139,7 @@ func EncodeUnitsCSV(store map[string][]byte, out io.Writer) (err error) {
 
 // EncodeWeaponsCSV writes tdf weapon data in CSV format
 func EncodeWeaponsCSV(store map[string][]byte, out io.Writer) (err error) {
-	weapNodes, err := loadTdfDataDir(store, escWeaponsDir)
+	weapNodes, err := loadTdfDataDir(store, weaponDir)
 	if err != nil {
 		return err
 	}
@@ -56,6 +152,7 @@ func EncodeWeaponsCSV(store map[string][]byte, out io.Writer) (err error) {
 	csvWriter.Flush()
 	return
 }
+
 // ExportPicsToZip writes the unitpics to a zip file
 func ExportPicsToZip(pics map[string]image.Image, out io.Writer) (err error) {
 	zipWriter := zip.NewWriter(out)
@@ -96,11 +193,12 @@ func loadTdfDataDir(store map[string][]byte, dir string) (nodes []*tdf.Node, err
 	}
 	return
 }
+
 // GatherUnitPics extracts the pcx unit pics from the memory store
 func GatherUnitPics(store map[string][]byte) (pics map[string]image.Image, err error) {
 	pics = make(map[string]image.Image)
 	fileNames := []string{}
-	dirPath := path.Join("/", escUnitpicsDir)
+	dirPath := path.Join("/", unitpicsDir)
 	for k := range store {
 		if strings.Index(k, dirPath) == 0 {
 			fileNames = append(fileNames, k)
@@ -217,5 +315,3 @@ func makeWeaponRecords(weaponList []*tdf.Node) (records [][]string, err error) {
 	}
 	return
 }
-
-

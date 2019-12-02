@@ -1,11 +1,11 @@
 package ugd
 
 import (
-	"testing"
-	"os"
-	"strings"
-	"path"
 	"encoding/gob"
+	"os"
+	"path"
+	"strings"
+	"testing"
 )
 
 func openGob() (store map[string][]byte, err error) {
@@ -27,11 +27,11 @@ func TestMakeRecords(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	nodes, err := loadTdfDataDir(db, escUnitsDir)
+	nodes, err := loadTdfDataDir(db, unitsDir)
 	if err != nil {
 		t.Error(err)
 	}
-	downloadNodes, err := loadTdfDataDir(db, escDownloadsDir)
+	downloadNodes, err := loadTdfDataDir(db, downloadsDir)
 	if err != nil {
 		t.Error(err)
 	}
@@ -46,7 +46,7 @@ func TestMakeRecords(t *testing.T) {
 	if len(unitRecords[0]) < 2 {
 		t.Error("no fields were created")
 	}
-	weapNodes, err := loadTdfDataDir(db, escWeaponsDir)
+	weapNodes, err := loadTdfDataDir(db, weaponDir)
 	if err != nil {
 		t.Error(err)
 	}
@@ -131,14 +131,14 @@ func TestUnitData(t *testing.T) {
 	if len(db["/unitsE/ARMCOM.fbi"]) == 0 {
 		t.Error("missing file")
 	}
-	nodes, err := loadTdfDataDir(db, escUnitsDir)
+	nodes, err := loadTdfDataDir(db, unitsDir)
 	if err != nil {
 		t.Error(err)
 	}
 	if len(nodes) == 0 {
 		t.Error("got 0 for unit count, expected at least a couple hundred")
 	}
-	downloadNodes, err := loadTdfDataDir(db, escDownloadsDir)
+	downloadNodes, err := loadTdfDataDir(db, downloadsDir)
 	if err != nil {
 		t.Error(err)
 	}
