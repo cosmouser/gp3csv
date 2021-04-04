@@ -63,19 +63,19 @@ func processArchive(path, topts string, u, w, p, t bool) error {
 		dir := strings.Split(k, "/")
 
 		if len(dir) > 1 {
-			if i := strings.Index(dir[1], unitsDir); i == 0 {
+			if i := strings.Index(strings.ToLower(dir[1]), unitsDir); i == 0 {
 				modUnitsDir = dir[1]
 				continue
 			}
-			if i := strings.Index(dir[1], weaponDir); i == 0 {
+			if i := strings.Index(strings.ToLower(dir[1]), weaponDir); i == 0 {
 				modWeaponDir = dir[1]
 				continue
 			}
-			if i := strings.Index(dir[1], unitpicDir); i == 0 {
+			if i := strings.Index(strings.ToLower(dir[1]), unitpicDir); i == 0 {
 				modUnitpicDir = dir[1]
 				continue
 			}
-			if i := strings.Index(dir[1], downloadsDir); i == 0 {
+			if i := strings.Index(strings.ToLower(dir[1]), downloadsDir); i == 0 {
 				modDownloadsDir = dir[1]
 				continue
 			}
@@ -96,7 +96,7 @@ func processArchive(path, topts string, u, w, p, t bool) error {
 		fmt.Fprint(os.Stderr, "could not find unitpic directory")
 		os.Exit(1)
 	}
-	if modDownloadsDir == "" {
+	if modDownloadsDir == "" && !t {
 		fmt.Fprint(os.Stderr, "could not find downloads directory")
 		os.Exit(1)
 	}
